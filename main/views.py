@@ -27,19 +27,44 @@ logger = logging.getLogger(__name__)
 
 def home_view(request):
     """Главная страница"""
-    # Получаем статистику
-    characters_count = Character.objects.count()
-    episodes_count = Episode.objects.count()
-    locations_count = Location.objects.count()
-    
-    # Последние поисковые запросы
-    recent_searches = SearchHistory.objects.order_by('-created')[:5]
+    try:
+        # Пытаемся получить статистику из базы данных
+        characters_count = Character.objects.count()
+        episodes_count = Episode.objects.count()
+        locations_count = Location.objects.count()
+        recent_searches = SearchHistory.objects.order_by('-created')[:5]
+        data_source = "database"
+    except Exception as e:
+        logger.warning(f"Database not available for home view: {e}")
+        # Fallback к API если БД недоступна
+        try:
+            # Получаем общую информацию из API
+            api_info = api_service._make_request('character')
+            characters_count = api_info.get('info', {}).get('count', 826) if api_info else 826
+            
+            api_info = api_service._make_request('episode')
+            episodes_count = api_info.get('info', {}).get('count', 51) if api_info else 51
+            
+            api_info = api_service._make_request('location')
+            locations_count = api_info.get('info', {}).get('count', 126) if api_info else 126
+            
+            recent_searches = []
+            data_source = "api"
+        except Exception as api_error:
+            logger.error(f"API also failed: {api_error}")
+            # Hardcoded fallback значения
+            characters_count = 826
+            episodes_count = 51
+            locations_count = 126
+            recent_searches = []
+            data_source = "fallback"
     
     context = {
         'characters_count': characters_count,
         'episodes_count': episodes_count,
         'locations_count': locations_count,
         'recent_searches': recent_searches,
+        'data_source': data_source,
     }
     return render(request, 'main/home.html', context)
 

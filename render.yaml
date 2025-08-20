@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: "./build.sh"
-    startCommand: "gunicorn rick_and_morty_app.wsgi:application"
+    startCommand: "./start.sh"
     envVars:
       - key: SECRET_KEY
         generateValue: true
