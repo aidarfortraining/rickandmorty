@@ -338,39 +338,97 @@ rickandmorty/
 
 ## 🚀 Развертывание
 
-### Production настройки
-```python
-# settings.py
-DEBUG = False
-ALLOWED_HOSTS = ['your-domain.com']
-STATIC_ROOT = BASE_DIR / 'static_collected'
+### 🌐 Live Demo
+Приложение развернуто на **Render.com**: [https://rickandmorty-aidar.onrender.com](https://rickandmorty-aidar.onrender.com)
 
-# База данных для production
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
-}
-```
+### Render.com (Рекомендуется)
+
+**Автоматическое развертывание через GitHub:**
+
+1. **Создайте аккаунт на [Render.com](https://render.com)**
+2. **Подключите GitHub репозиторий**
+3. **Создайте новый Web Service:**
+   - Repository: `https://github.com/aidarfortraining/rickandmorty`
+   - Branch: `main`
+   - Build Command: `./build.sh`
+   - Start Command: `gunicorn rick_and_morty_app.wsgi:application`
+
+4. **Добавьте переменные окружения:**
+   ```
+   SECRET_KEY=your-secret-key-here
+   DEBUG=False
+   ALLOWED_HOSTS=your-app-name.onrender.com,.onrender.com
+   ```
+
+5. **Создайте PostgreSQL базу данных** (бесплатно на Render)
+6. **Подключите DATABASE_URL** автоматически
+
+**Преимущества Render:**
+- ✅ Бесплатный план с PostgreSQL
+- ✅ Автоматические деплои из GitHub
+- ✅ HTTPS из коробки
+- ✅ Простая настройка
 
 ### Docker развертывание
-```dockerfile
-FROM python:3.11-slim
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+```bash
+# Сборка образа
+docker build -t rickandmorty .
 
-COPY . .
-RUN python manage.py collectstatic --noinput
+# Запуск контейнера
+docker run -p 8000:8000 \
+  -e SECRET_KEY=your-secret-key \
+  -e DEBUG=False \
+  rickandmorty
+```
 
-EXPOSE 8000
-CMD ["gunicorn", "rick_and_morty_app.wsgi:application"]
+### Heroku развертывание
+
+```bash
+# Установите Heroku CLI
+# Создайте приложение
+heroku create your-app-name
+
+# Добавьте buildpack
+heroku buildpacks:set heroku/python
+
+# Настройте переменные
+heroku config:set SECRET_KEY=your-secret-key
+heroku config:set DEBUG=False
+
+# Добавьте PostgreSQL
+heroku addons:create heroku-postgresql:hobby-dev
+
+# Деплой
+git push heroku main
+```
+
+### Vercel развертывание
+
+```bash
+# Установите Vercel CLI
+npm i -g vercel
+
+# Деплой
+vercel --prod
+```
+
+### Production настройки
+
+Файл `render.yaml` для автоматического развертывания:
+```yaml
+services:
+  - type: web
+    name: rickandmorty
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn rick_and_morty_app.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
 ```
 
 ## 📝 Лицензия

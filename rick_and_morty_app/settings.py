@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,22 +88,21 @@ WSGI_APPLICATION = 'rick_and_morty_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database configuration
+# For production on Render, use PostgreSQL from environment
+if os.environ.get('DATABASE_URL'):
+    # Production database (Render provides DATABASE_URL)
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
-}
-
-# Production database configuration (example)
-if not DEBUG:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'rickandmorty'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+else:
+    # Development database
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
 
 
@@ -216,3 +216,26 @@ LOGGING = {
 import pathlib
 logs_dir = BASE_DIR / 'logs'
 logs_dir.mkdir(exist_ok=True)
+
+# Production settings
+if not DEBUG:
+    # Security settings for production
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    
+    # Add your production domain to ALLOWED_HOSTS
+    ALLOWED_HOSTS.extend([
+        '.onrender.com',  # Render.com domains
+        'rickandmorty-aidar.onrender.com',  # Your specific domain
+    ])
+
+# Static files settings for production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files settings (if needed in future)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: rickandmorty
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn rick_and_morty_app.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rickandmorty-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: "rickandmorty-aidar.onrender.com,.onrender.com"
+
+databases:
+  - name: rickandmorty-db
+    plan: free
