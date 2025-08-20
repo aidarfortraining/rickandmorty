@@ -1,51 +1,52 @@
 """
-Middleware для автоматической инициализации базы данных
+Middleware для автоматической инициализации базы данных (только для production)
 """
 import logging
+import os
 from django.db import connection
-from django.core.management import execute_from_command_line
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 class DatabaseInitMiddleware:
-    """Middleware для проверки и инициализации базы данных"""
+    """Middleware для проверки и инициализации базы данных (только на production)"""
     
     def __init__(self, get_response):
         self.get_response = get_response
-        self.db_initialized = False
-        self.check_and_init_database()
+        self.db_checked = False
+        
+        # Запускаем проверку только в production окружении
+        self.is_production = os.environ.get('RENDER') or not settings.DEBUG
+        
+        if self.is_production:
+            logger.info("Production environment detected, will check database")
+        else:
+            logger.info("Development environment, skipping auto database init")
     
-    def check_and_init_database(self):
-        """Проверяет и инициализирует базу данных если нужно"""
-        if self.db_initialized:
+    def check_database_lazy(self):
+        """Ленивая проверка базы данных (только при первом запросе)"""
+        if self.db_checked or not self.is_production:
             return
             
         try:
-            # Проверяем есть ли таблицы
+            # Проверяем есть ли основные таблицы
             with connection.cursor() as cursor:
                 cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='main_character';")
                 if cursor.fetchone():
-                    logger.info("Database already initialized")
-                    self.db_initialized = True
-                    return
+                    logger.info("Database tables found")
+                else:
+                    logger.warning("Database tables not found, but auto-migration disabled in middleware")
                     
-            logger.info("Database not initialized, running migrations...")
-            
-            # Выполняем миграции
-            execute_from_command_line(['manage.py', 'makemigrations'])
-            execute_from_command_line(['manage.py', 'migrate'])
-            
-            logger.info("Database migrations completed")
-            self.db_initialized = True
+            self.db_checked = True
             
         except Exception as e:
-            logger.error(f"Database initialization failed: {e}")
+            logger.error(f"Database check failed: {e}")
+            self.db_checked = True  # Не проверяем снова
     
     def __call__(self, request):
-        # Проверяем БД только если еще не инициализирована
-        if not self.db_initialized:
-            self.check_and_init_database()
+        # Проверяем БД только при первом запросе в production
+        if not self.db_checked and self.is_production:
+            self.check_database_lazy()
             
         response = self.get_response(request)
         return response

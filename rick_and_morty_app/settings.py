@@ -66,7 +66,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files in production
-    'main.middleware.DatabaseInitMiddleware',  # Auto database initialization
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,6 +73,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Add database init middleware only in production
+if os.environ.get('RENDER'):
+    MIDDLEWARE.insert(2, 'main.middleware.DatabaseInitMiddleware')
 
 ROOT_URLCONF = 'rick_and_morty_app.urls'
 
