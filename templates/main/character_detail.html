@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if character_data %}{{ character_data.name }}{% else %}{{ character.name }}{% endif %} - Rick and Morty
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 text-center mb-4">
+        {% if character_data %}
+            <img src="{{ character_data.image }}" alt="{{ character_data.name }}" 
+                 class="character-detail-img img-fluid mb-3" style="max-width: 300px;">
+        {% else %}
+            <img src="{{ character.image }}" alt="{{ character.name }}" 
+                 class="character-detail-img img-fluid mb-3" style="max-width: 300px;">
+        {% endif %}
+    </div>
+    
+    <div class="col-md-8">
+        <div class="character-info">
+            {% if character_data %}
+                <h1 class="display-4 mb-4">{{ character_data.name }}</h1>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <strong>Статус:</strong>
+                        <span class="badge status-{{ character_data.status|lower }} ms-2">
+                            {% if character_data.status|lower == 'alive' %}
+                                Живой
+                            {% elif character_data.status|lower == 'dead' %}
+                                Мертвый
+                            {% else %}
+                                Неизвестно
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Пол:</strong>
+                        <span class="badge gender-{{ character_data.gender|lower }} ms-2">
+                            {% if character_data.gender|lower == 'male' %}
+                                Мужской
+                            {% elif character_data.gender|lower == 'female' %}
+                                Женский
+                            {% elif character_data.gender|lower == 'genderless' %}
+                                Бесполый
+                            {% else %}
+                                Неизвестно
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <strong>Вид:</strong> {{ character_data.species|default:"Неизвестно" }}
+                    </div>
+                    {% if character_data.type %}
+                    <div class="col-sm-6">
+                        <strong>Тип:</strong> {{ character_data.type }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <strong>Происхождение:</strong> {{ character_data.origin.name|default:"Неизвестно" }}
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Местоположение:</strong> {{ character_data.location.name|default:"Неизвестно" }}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <strong>Эпизоды:</strong>
+                    <span class="badge bg-info">{{ character_data.episode|length }} эпизод{{ character_data.episode|length|pluralize:"ов" }}</span>
+                </div>
+            {% else %}
+                <h1 class="display-4 mb-4">{{ character.name }}</h1>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <strong>Статус:</strong>
+                        <span class="badge status-{{ character.status }} ms-2">
+                            {{ character.status_display }}
+                        </span>
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Пол:</strong>
+                        <span class="badge gender-{{ character.gender }} ms-2">
+                            {{ character.gender_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <strong>Вид:</strong> {{ character.species|default:"Неизвестно" }}
+                    </div>
+                    {% if character.type %}
+                    <div class="col-sm-6">
+                        <strong>Тип:</strong> {{ character.type }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <strong>Происхождение:</strong> 
+                        {% if character.origin %}
+                            <a href="{% url 'main:location-detail' character.origin.pk %}">
+                                {{ character.origin.name }}
+                            </a>
+                        {% else %}
+                            Неизвестно
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>Местоположение:</strong>
+                        {% if character.location %}
+                            <a href="{% url 'main:location-detail' character.location.pk %}">
+                                {{ character.location.name }}
+                            </a>
+                        {% else %}
+                            Неизвестно
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <strong>Эпизоды:</strong>
+                    <span class="badge bg-info">{{ character.episodes.count }} эпизод{{ character.episodes.count|pluralize:"ов" }}</span>
+                </div>
+            {% endif %}
+            
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'main:characters' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-1"></i>Назад к персонажам
+                </a>
+                <a href="{% url 'main:search' %}?q={% if character_data %}Human{% else %}{{ character.species|default:"Human" }}{% endif %}&type=character" 
+                   class="btn btn-outline-success">
+                    <i class="bi bi-search me-1"></i>Похожие персонажи
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if from_db %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <i class="bi bi-database me-2"></i>
+            Данные загружены из локальной базы данных (API недоступен)
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

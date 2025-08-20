@@ -1,0 +1,808 @@
+/* Rick and Morty Theme Colors */
+:root {
+    --primary-color: #00b8d4;
+    --secondary-color: #7c4dff;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --dark-color: #263238;
+    --light-color: #eceff1;
+    --rick-green: #4caf50;
+    --morty-yellow: #ffc107;
+    --portal-blue: #00bcd4;
+    
+    /* Light Theme Variables */
+    --bg-primary: #ffffff;
+    --bg-secondary: rgba(255, 255, 255, 0.95);
+    --bg-tertiary: rgba(255, 255, 255, 0.9);
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --border-color: #eee;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-hover: rgba(0, 0, 0, 0.15);
+    --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --navbar-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: rgba(30, 30, 30, 0.95);
+    --bg-tertiary: rgba(40, 40, 40, 0.9);
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-muted: #aaaaaa;
+    --border-color: #444;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-hover: rgba(0, 0, 0, 0.5);
+    --gradient-bg: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --card-bg: rgba(30, 30, 30, 0.95);
+    --navbar-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Global Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: var(--gradient-bg);
+    min-height: 100vh;
+    padding-top: 76px;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.main-content {
+    min-height: calc(100vh - 200px);
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    margin: 20px 0;
+    padding: 30px 0;
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+/* Navigation */
+.navbar-brand {
+    font-size: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px var(--shadow-color);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px var(--shadow-hover);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* Character Status Badges */
+.status-alive {
+    background: var(--rick-green) !important;
+}
+
+.status-dead {
+    background: var(--danger-color) !important;
+}
+
+.status-unknown {
+    background: var(--warning-color) !important;
+}
+
+/* Gender Badges */
+.gender-male {
+    background: var(--portal-blue) !important;
+}
+
+.gender-female {
+    background: var(--secondary-color) !important;
+}
+
+.gender-genderless,
+.gender-unknown {
+    background: var(--dark-color) !important;
+}
+
+/* Search and Filter Forms */
+.filter-form {
+    background: var(--bg-tertiary);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    color: var(--text-primary);
+}
+
+.search-hero {
+    background: linear-gradient(135deg, var(--portal-blue), var(--secondary-color));
+    color: white;
+    border-radius: 15px;
+    padding: 40px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Pagination */
+.pagination {
+    justify-content: center;
+}
+
+.page-link {
+    border-radius: 10px !important;
+    margin: 0 5px;
+    border: none;
+    color: var(--primary-color);
+}
+
+.page-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Stats Cards */
+.stats-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading Animations */
+.loading {
+    text-align: center;
+    padding: 50px;
+}
+
+.loading i {
+    font-size: 3rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Skeleton Loaders */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .skeleton {
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Skeleton Card */
+.skeleton-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 70%;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    height: 16px;
+    width: 90%;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.skeleton-text-short {
+    height: 16px;
+    width: 60%;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.skeleton-badge {
+    height: 20px;
+    width: 80px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* Pulse Animation for Active Loading */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Spinner Loaders */
+.spinner-portal {
+    width: 40px;
+    height: 40px;
+    border: 4px solid transparent;
+    border-top: 4px solid var(--primary-color);
+    border-right: 4px solid var(--secondary-color);
+    border-radius: 50%;
+    animation: spin-portal 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin-portal {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-rick {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, var(--rick-green), var(--portal-blue));
+    border-radius: 50%;
+    animation: rick-bounce 1.5s ease-in-out infinite;
+    margin: 20px auto;
+    position: relative;
+}
+
+.spinner-rick::after {
+    content: '🥒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    animation: rick-spin 2s linear infinite;
+}
+
+@keyframes rick-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes rick-spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Loading States */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 15px;
+}
+
+[data-theme="dark"] .loading-overlay {
+    background: rgba(30, 30, 30, 0.8);
+}
+
+.loading-text {
+    margin-top: 15px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Character Detail Page */
+.character-detail-img {
+    border-radius: 50%;
+    border: 5px solid var(--primary-color);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.character-info {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Episode List */
+.episode-card {
+    border-left: 5px solid var(--primary-color);
+    background: rgba(255, 255, 255, 0.95);
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.episode-card:hover {
+    border-left-color: var(--secondary-color);
+    transform: translateX(10px);
+}
+
+/* Location Cards */
+.location-card {
+    background: linear-gradient(135deg, rgba(103, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.location-card:hover {
+    border-color: var(--primary-color);
+}
+
+/* Search Results */
+.search-result-item {
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 0;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+}
+
+.search-result-item:hover {
+    background: rgba(0, 184, 212, 0.05);
+    border-radius: 10px;
+    padding: 20px 15px;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        margin: 10px;
+        border-radius: 10px;
+        padding: 20px 0;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .character-detail-img {
+        max-width: 200px;
+    }
+    
+    .filter-form {
+        padding: 15px;
+    }
+    
+    .search-hero {
+        padding: 20px;
+    }
+    
+    /* Mobile theme switcher */
+    .theme-switcher {
+        width: 50px;
+        height: 25px;
+    }
+    
+    .theme-slider:before {
+        height: 20px;
+        width: 20px;
+        left: 2px;
+        bottom: 2px;
+        font-size: 10px;
+    }
+    
+    input:checked + .theme-slider:before {
+        transform: translateX(25px);
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+/* Dark theme scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Portal Effect */
+.portal-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.portal-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 188, 212, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.portal-effect:hover::before {
+    left: 100%;
+}
+
+/* Rick and Morty themed buttons */
+.btn-rick {
+    background: linear-gradient(135deg, var(--rick-green), #66bb6a);
+    border: none;
+    color: white;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-rick:hover {
+    background: linear-gradient(135deg, #66bb6a, var(--rick-green));
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.btn-morty {
+    background: linear-gradient(135deg, var(--morty-yellow), #ffca28);
+    border: none;
+    color: #333;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-morty:hover {
+    background: linear-gradient(135deg, #ffca28, var(--morty-yellow));
+    color: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+}
+
+/* Theme Switcher */
+.theme-switcher {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    margin: 0 10px;
+}
+
+.theme-switcher input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--morty-yellow), #ffca28);
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.theme-slider:before {
+    position: absolute;
+    content: "☀️";
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .theme-slider {
+    background: linear-gradient(135deg, var(--dark-color), #37474f);
+}
+
+input:checked + .theme-slider:before {
+    transform: translateX(30px);
+    content: "🌙";
+}
+
+.theme-switcher:hover .theme-slider {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark theme specific adjustments */
+[data-theme="dark"] .navbar-dark {
+    background: var(--navbar-bg) !important;
+}
+
+[data-theme="dark"] .character-info,
+[data-theme="dark"] .episode-card {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+    background-color: var(--bg-tertiary);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 212, 0.25);
+}
+
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] .form-select::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.8;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.9;
+}
+
+/* Специально для поискового поля в навигации */
+[data-theme="dark"] .navbar input[type="search"]::placeholder {
+    color: #cccccc !important;
+    opacity: 0.9;
+}
+
+[data-theme="dark"] .navbar .form-control-sm::placeholder {
+    color: #cccccc !important;
+    opacity: 0.9;
+}
+
+[data-theme="dark"] .btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+[data-theme="dark"] .text-muted {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .border-bottom {
+    border-color: var(--border-color) !important;
+}
+
+/* Additional dark theme adjustments */
+[data-theme="dark"] .badge {
+    color: white !important;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+[data-theme="dark"] option {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] select option {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .input-group-text {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .alert {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .alert-info {
+    background-color: rgba(0, 184, 212, 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .alert-success {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+[data-theme="dark"] .alert-warning {
+    background-color: rgba(255, 152, 0, 0.1);
+    border-color: var(--warning-color);
+    color: var(--warning-color);
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-footer {
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .table {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td,
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > th {
+    background-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .pagination .page-link {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .pagination .page-link:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+[data-theme="dark"] .pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Footer dark theme */
+[data-theme="dark"] footer.bg-dark {
+    background: var(--bg-secondary) !important;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Улучшение видимости лейблов и текста в формах */
+[data-theme="dark"] label {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .form-label {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .input-group .form-control,
+[data-theme="dark"] .input-group .form-select {
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .btn-outline-light {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .btn-outline-light:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}

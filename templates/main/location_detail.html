@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if location_data %}{{ location_data.name }}{% else %}{{ location.name }}{% endif %} - Rick and Morty
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="character-info">
+            {% if location_data %}
+                <h1 class="display-4 mb-4">{{ location_data.name }}</h1>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-geo-alt me-2"></i>Информация о локации</h5>
+                        <p><strong>Тип:</strong> {{ location_data.type|default:"Неизвестно" }}</p>
+                        <p><strong>Измерение:</strong> {{ location_data.dimension|default:"Неизвестно" }}</p>
+                        <p><strong>Жителей:</strong> 
+                           <span class="badge bg-info">{{ location_data.residents|length }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if location_data.residents %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-people me-2"></i>Жители локации</h5>
+                    <div class="row">
+                        {% for resident_url in location_data.residents|slice:":12" %}
+                            <div class="col-md-3 mb-2">
+                                <span class="badge bg-success">Житель #{{ resident_url|slice:"-2:" }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if location_data.residents|length > 12 %}
+                        <p class="text-muted">...и еще {{ location_data.residents|length|add:"-12" }} житель{{ location_data.residents|length|add:"-12"|pluralize:"ей" }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <h1 class="display-4 mb-4">{{ location.name }}</h1>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-geo-alt me-2"></i>Информация о локации</h5>
+                        <p><strong>Тип:</strong> {{ location.type|default:"Неизвестно" }}</p>
+                        <p><strong>Измерение:</strong> {{ location.dimension|default:"Неизвестно" }}</p>
+                        <p><strong>Происходят отсюда:</strong> 
+                           <span class="badge bg-warning">{{ location.origin_characters.count }}</span>
+                        </p>
+                        <p><strong>Живут сейчас:</strong> 
+                           <span class="badge bg-info">{{ location.current_characters.count }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if location.current_characters.exists %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-people me-2"></i>Текущие жители</h5>
+                    <div class="row">
+                        {% for character in location.current_characters.all|slice:":8" %}
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1">{{ character.name }}</h6>
+                                        <small class="text-muted">{{ character.species }}</small>
+                                        <div class="mt-2">
+                                            <a href="{% url 'main:character-detail' character.pk %}" class="btn btn-sm btn-primary">
+                                                Подробнее
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if location.origin_characters.exists %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-house me-2"></i>Происходят отсюда</h5>
+                    <div class="row">
+                        {% for character in location.origin_characters.all|slice:":8" %}
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1">{{ character.name }}</h6>
+                                        <small class="text-muted">{{ character.species }}</small>
+                                        <div class="mt-2">
+                                            <a href="{% url 'main:character-detail' character.pk %}" class="btn btn-sm btn-primary">
+                                                Подробнее
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+            
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'main:locations' %}" class="btn btn-outline-info">
+                    <i class="bi bi-arrow-left me-1"></i>Назад к локациям
+                </a>
+                <a href="{% url 'main:search' %}?q={% if location_data %}{{ location_data.type }}{% else %}{{ location.type }}{% endif %}&type=location" 
+                   class="btn btn-outline-success">
+                    <i class="bi bi-search me-1"></i>Похожие локации
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if from_db %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <i class="bi bi-database me-2"></i>
+            Данные загружены из локальной базы данных (API недоступен)
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

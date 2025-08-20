@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if episode_data %}{{ episode_data.name }}{% else %}{{ episode.name }}{% endif %} - Rick and Morty
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="character-info">
+            {% if episode_data %}
+                <h1 class="display-4 mb-4">{{ episode_data.name }}</h1>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-play-circle me-2"></i>Информация об эпизоде</h5>
+                        <p><strong>Номер эпизода:</strong> {{ episode_data.episode }}</p>
+                        <p><strong>Дата выхода:</strong> {{ episode_data.air_date }}</p>
+                        <p><strong>Персонажей в эпизоде:</strong> 
+                           <span class="badge bg-info">{{ episode_data.characters|length }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if episode_data.characters %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-people me-2"></i>Персонажи в эпизоде</h5>
+                    <div class="row">
+                        {% for character_url in episode_data.characters|slice:":12" %}
+                            <div class="col-md-3 mb-2">
+                                <span class="badge bg-primary">Персонаж #{{ character_url|slice:"-2:" }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if episode_data.characters|length > 12 %}
+                        <p class="text-muted">...и еще {{ episode_data.characters|length|add:"-12" }} персонаж{{ episode_data.characters|length|add:"-12"|pluralize:"ей" }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <h1 class="display-4 mb-4">{{ episode.name }}</h1>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-play-circle me-2"></i>Информация об эпизоде</h5>
+                        <p><strong>Номер эпизода:</strong> {{ episode.episode }}</p>
+                        <p><strong>Дата выхода:</strong> {{ episode.air_date }}</p>
+                        <p><strong>Персонажей в эпизоде:</strong> 
+                           <span class="badge bg-info">{{ episode.characters.count }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if episode.characters.exists %}
+                <div class="mb-4">
+                    <h5><i class="bi bi-people me-2"></i>Персонажи в эпизоде</h5>
+                    <div class="row">
+                        {% for character in episode.characters.all|slice:":12" %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1">{{ character.name }}</h6>
+                                        <small class="text-muted">{{ character.species }}</small>
+                                        <div class="mt-2">
+                                            <a href="{% url 'main:character-detail' character.pk %}" class="btn btn-sm btn-primary">
+                                                Подробнее
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+            
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'main:episodes' %}" class="btn btn-outline-success">
+                    <i class="bi bi-arrow-left me-1"></i>Назад к эпизодам
+                </a>
+                <a href="{% url 'main:search' %}?q={% if episode_data %}{{ episode_data.episode }}{% else %}{{ episode.episode }}{% endif %}&type=episode" 
+                   class="btn btn-outline-info">
+                    <i class="bi bi-search me-1"></i>Похожие эпизоды
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if from_db %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <i class="bi bi-database me-2"></i>
+            Данные загружены из локальной базы данных (API недоступен)
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

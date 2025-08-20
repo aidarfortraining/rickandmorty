@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rick and Morty Universe - Главная{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Hero Section -->
+    <div class="col-12">
+        <div class="search-hero text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="bi bi-rocket-takeoff me-3"></i>
+                Добро пожаловать во вселенную Rick and Morty!
+            </h1>
+            <p class="lead mb-4">
+                Исследуйте удивительный мир персонажей, эпизодов и локаций из популярного мультсериала
+            </p>
+            
+            <!-- Quick Search -->
+            <form method="GET" action="{% url 'main:search' %}" class="row g-2 justify-content-center">
+                <div class="col-md-6">
+                    <input type="text" class="form-control form-control-lg" name="q" 
+                           placeholder="Найти персонажа, эпизод или локацию..." required>
+                </div>
+                <div class="col-md-3">
+                    <select name="type" class="form-select form-select-lg">
+                        <option value="character">Персонажи</option>
+                        <option value="episode">Эпизоды</option>
+                        <option value="location">Локации</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-light btn-lg w-100">
+                        <i class="bi bi-search"></i> Поиск
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <!-- Statistics Cards -->
+    <div class="col-md-4 mb-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ characters_count|default:"∞" }}</div>
+            <h5><i class="bi bi-people me-2"></i>Персонажей</h5>
+            <p class="mb-0">в нашей базе данных</p>
+            <a href="{% url 'main:characters' %}" class="btn btn-light btn-sm mt-3">
+                Посмотреть всех <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ episodes_count|default:"∞" }}</div>
+            <h5><i class="bi bi-play-circle me-2"></i>Эпизодов</h5>
+            <p class="mb-0">для просмотра</p>
+            <a href="{% url 'main:episodes' %}" class="btn btn-light btn-sm mt-3">
+                Посмотреть все <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ locations_count|default:"∞" }}</div>
+            <h5><i class="bi bi-geo-alt me-2"></i>Локаций</h5>
+            <p class="mb-0">для исследования</p>
+            <a href="{% url 'main:locations' %}" class="btn btn-light btn-sm mt-3">
+                Исследовать <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Navigation -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 portal-effect">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-people display-1 text-primary"></i>
+                </div>
+                <h4 class="card-title">Персонажи</h4>
+                <p class="card-text">
+                    Изучите всех персонажей вселенной Rick and Morty - от главных героев до второстепенных персонажей
+                </p>
+                <a href="{% url 'main:characters' %}" class="btn btn-rick">
+                    <i class="bi bi-people me-2"></i>Смотреть персонажей
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 portal-effect">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-play-circle display-1 text-success"></i>
+                </div>
+                <h4 class="card-title">Эпизоды</h4>
+                <p class="card-text">
+                    Просмотрите информацию о всех эпизодах сериала, узнайте даты выхода и участвующих персонажей
+                </p>
+                <a href="{% url 'main:episodes' %}" class="btn btn-morty">
+                    <i class="bi bi-play-circle me-2"></i>Смотреть эпизоды
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 portal-effect">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-geo-alt display-1 text-info"></i>
+                </div>
+                <h4 class="card-title">Локации</h4>
+                <p class="card-text">
+                    Исследуйте различные миры и измерения, где происходят приключения Рика и Морти
+                </p>
+                <a href="{% url 'main:locations' %}" class="btn btn-rick">
+                    <i class="bi bi-geo-alt me-2"></i>Исследовать локации
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if recent_searches %}
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history me-2"></i>Последние поисковые запросы
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for search in recent_searches %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="d-flex align-items-center p-2 border rounded hover-bg-light">
+                            <div class="me-3">
+                                {% if search.search_type == 'character' %}
+                                    <i class="bi bi-person text-primary"></i>
+                                {% elif search.search_type == 'episode' %}
+                                    <i class="bi bi-play-circle text-success"></i>
+                                {% else %}
+                                    <i class="bi bi-geo-alt text-info"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <a href="{% url 'main:search' %}?q={{ search.query }}&type={{ search.search_type }}" 
+                                   class="text-decoration-none">
+                                    <strong>{{ search.query }}</strong>
+                                </a>
+                                <br>
+                                <small class="text-muted">
+                                    {{ search.results_count }} результат{{ search.results_count|pluralize:"ов" }}
+                                </small>
+                            </div>
+                            <small class="text-muted">
+                                {{ search.created|timesince }} назад
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Features Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h3 class="text-center mb-4">
+                    <i class="bi bi-stars me-2"></i>Возможности приложения
+                </h3>
+                <div class="row">
+                    <div class="col-md-3 text-center mb-4">
+                        <i class="bi bi-search display-4 text-primary mb-3"></i>
+                        <h5>Мощный поиск</h5>
+                        <p class="text-muted">Найдите любого персонажа, эпизод или локацию с помощью умного поиска</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-4">
+                        <i class="bi bi-funnel display-4 text-success mb-3"></i>
+                        <h5>Фильтрация</h5>
+                        <p class="text-muted">Используйте фильтры для поиска персонажей по статусу, полу и виду</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-4">
+                        <i class="bi bi-phone display-4 text-info mb-3"></i>
+                        <h5>Адаптивный дизайн</h5>
+                        <p class="text-muted">Удобно пользоваться на любых устройствах - от телефона до компьютера</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-4">
+                        <i class="bi bi-lightning display-4 text-warning mb-3"></i>
+                        <h5>Быстрая загрузка</h5>
+                        <p class="text-muted">Данные кэшируются для максимально быстрой работы приложения</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to feature cards
+    document.querySelectorAll('.stats-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add typing effect to hero title (optional enhancement)
+    const heroTitle = document.querySelector('.search-hero h1');
+    if (heroTitle) {
+        heroTitle.style.opacity = '0';
+        setTimeout(() => {
+            heroTitle.style.opacity = '1';
+            heroTitle.style.transition = 'opacity 1s ease-in';
+        }, 300);
+    }
+});
+</script>
+{% endblock %}
+

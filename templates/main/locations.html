@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Локации Rick and Morty{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold text-center mb-4">
+            <i class="bi bi-geo-alt me-3"></i>Локации Rick and Morty
+        </h1>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-form mb-4">
+    <form method="GET" class="row g-3">
+        <div class="col-md-4">
+            <label for="name" class="form-label">Название локации</label>
+            <input type="text" class="form-control" id="name" name="name" 
+                   value="{{ filters.name }}" placeholder="Введите название...">
+        </div>
+        
+        <div class="col-md-3">
+            <label for="type" class="form-label">Тип</label>
+            <input type="text" class="form-control" id="type" name="type" 
+                   value="{{ filters.type }}" placeholder="Например: Planet">
+        </div>
+        
+        <div class="col-md-3">
+            <label for="dimension" class="form-label">Измерение</label>
+            <input type="text" class="form-control" id="dimension" name="dimension" 
+                   value="{{ filters.dimension }}" placeholder="Например: C-137">
+        </div>
+        
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-info w-100">
+                <i class="bi bi-funnel me-1"></i>Фильтр
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Results Info -->
+{% if pagination_info.count %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Найдено <strong>{{ pagination_info.count }}</strong> локаци{{ pagination_info.count|pluralize:"я,и,й" }}
+            {% if filters.name or filters.type or filters.dimension %}
+                по вашим фильтрам
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Locations Grid -->
+<div class="row">
+    {% if locations %}
+        {% for location in locations %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="location-card card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ location.name }}</h5>
+                    <p class="card-text">
+                        <strong>Тип:</strong> {{ location.type|default:"Неизвестно" }}<br>
+                        <strong>Измерение:</strong> {{ location.dimension|default:"Неизвестно" }}
+                    </p>
+                    {% if location.residents %}
+                    <p class="mb-3">
+                        <strong>Жителей:</strong> 
+                        <span class="badge bg-success">{{ location.residents|length }}</span>
+                    </p>
+                    {% endif %}
+                    <div class="mt-auto">
+                        <a href="{% url 'main:location-detail' location.id %}" 
+                           class="btn btn-info btn-sm">
+                            <i class="bi bi-eye me-1"></i>Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-search display-1 text-muted mb-3"></i>
+                <h3>Локации не найдены</h3>
+                <p class="text-muted">
+                    {% if filters.name or filters.type or filters.dimension %}
+                        Попробуйте изменить параметры поиска или <a href="{% url 'main:locations' %}">сбросить фильтры</a>
+                    {% else %}
+                        API временно недоступен. Попробуйте позже.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if pagination_info.pages and pagination_info.pages > 1 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <nav aria-label="Навигация по локациям">
+            <ul class="pagination justify-content-center">
+                <!-- Previous Page -->
+                {% if pagination_info.prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ current_page|add:'-1' }}">
+                            <i class="bi bi-chevron-left"></i> Предыдущая
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            <i class="bi bi-chevron-left"></i> Предыдущая
+                        </span>
+                    </li>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% if pagination_info.pages %}
+                    {% for page_num in "12345"|make_list %}
+                        {% if page_num|add:"0" <= pagination_info.pages and page_num|add:"0" >= 1 %}
+                            {% if page_num|add:"0" == current_page %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_num }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Next Page -->
+                {% if pagination_info.next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ current_page|add:'1' }}">
+                            Следующая <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Следующая <i class="bi bi-chevron-right"></i>
+                        </span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <!-- Page Info -->
+        <div class="text-center text-muted">
+            Страница {{ current_page }} из {{ pagination_info.pages|default:"?" }}
+            {% if pagination_info.count %}
+                (всего {{ pagination_info.count }} локаци{{ pagination_info.count|pluralize:"я,и,й" }})
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="row mt-5">
+    <div class="col-12 text-center">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">Исследуйте мультивселенную</h5>
+                <p class="card-text">Откройте для себя персонажей и эпизоды</p>
+                <a href="{% url 'main:characters' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-people me-1"></i>Персонажи
+                </a>
+                <a href="{% url 'main:episodes' %}" class="btn btn-success me-2">
+                    <i class="bi bi-play-circle me-1"></i>Эпизоды
+                </a>
+                <a href="{% url 'main:search' %}" class="btn btn-warning">
+                    <i class="bi bi-search me-1"></i>Поиск
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on filter change
+    const form = document.querySelector('.filter-form form');
+    const inputs = form.querySelectorAll('input');
+    
+    // Submit form on Enter in input fields
+    inputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                form.submit();
+            }
+        });
+    });
+    
+    // Clear filters button
+    const clearFiltersBtn = document.createElement('button');
+    clearFiltersBtn.type = 'button';
+    clearFiltersBtn.className = 'btn btn-outline-secondary ms-2';
+    clearFiltersBtn.innerHTML = '<i class="bi bi-x-circle me-1"></i>Очистить';
+    clearFiltersBtn.onclick = function() {
+        window.location.href = '{% url "main:locations" %}';
+    };
+    
+    // Add clear button if there are active filters
+    {% if filters.name or filters.type or filters.dimension %}
+        form.querySelector('.col-md-2').appendChild(clearFiltersBtn);
+    {% endif %}
+});
+</script>
+{% endblock %}

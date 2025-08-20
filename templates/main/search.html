@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Поиск - Rick and Morty{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="search-hero">
+            <h1 class="display-5 fw-bold mb-4">
+                <i class="bi bi-search me-3"></i>Поиск по вселенной Rick and Morty
+            </h1>
+            
+            <!-- Search Form -->
+            <form method="GET" class="row g-3 justify-content-center">
+                <div class="col-md-6">
+                    <input type="text" class="form-control form-control-lg" name="q" 
+                           value="{{ query }}" placeholder="Что вы ищете?" required>
+                </div>
+                <div class="col-md-3">
+                    <select name="type" class="form-select form-select-lg">
+                        {% for value, label in search_types %}
+                            <option value="{{ value }}" {% if search_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-light btn-lg w-100">
+                        <i class="bi bi-search"></i> Найти
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results -->
+{% if query %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            {% if results_count > 0 %}
+                Найдено <strong>{{ results_count }}</strong> 
+                {% if search_type == 'character' %}
+                    персонаж{{ results_count|pluralize:"ей" }}
+                {% elif search_type == 'episode' %}
+                    эпизод{{ results_count|pluralize:"ов" }}
+                {% else %}
+                    локаци{{ results_count|pluralize:"я,и,й" }}
+                {% endif %}
+                по запросу "<strong>{{ query }}</strong>"
+            {% else %}
+                По запросу "<strong>{{ query }}</strong>" ничего не найдено
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row" id="search-results">
+    {% if results %}
+        {% for result in results %}
+            {% if search_type == 'character' %}
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <a href="{% url 'main:character-detail' result.id %}" class="text-decoration-none text-dark">
+                            <img src="{{ result.image }}" class="card-img-top" alt="{{ result.name }}"
+                                 style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ result.name }}</h5>
+                                <div class="mb-2">
+                                    <span class="badge status-{{ result.status|lower }} me-2">
+                                        {% if result.status|lower == 'alive' %}
+                                            <i class="bi bi-heart-fill me-1"></i>Живой
+                                        {% elif result.status|lower == 'dead' %}
+                                            <i class="bi bi-x-circle-fill me-1"></i>Мертвый
+                                        {% else %}
+                                            <i class="bi bi-question-circle-fill me-1"></i>Неизвестно
+                                        {% endif %}
+                                    </span>
+                                    <span class="badge gender-{{ result.gender|lower }}">
+                                        {% if result.gender|lower == 'male' %}
+                                            <i class="bi bi-person-fill me-1"></i>Мужской
+                                        {% elif result.gender|lower == 'female' %}
+                                            <i class="bi bi-person-fill me-1"></i>Женский
+                                        {% elif result.gender|lower == 'genderless' %}
+                                            <i class="bi bi-dash-circle-fill me-1"></i>Бесполый
+                                        {% else %}
+                                            <i class="bi bi-question-circle-fill me-1"></i>Неизвестно
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <p class="card-text">
+                                    <strong>Вид:</strong> {{ result.species|default:"Неизвестно" }}
+                                </p>
+                                <span class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-eye me-1"></i>Подробнее
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% elif search_type == 'episode' %}
+                <div class="col-md-6 mb-4">
+                    <div class="episode-card">
+                        <h5>{{ result.name }}</h5>
+                        <p class="mb-2">
+                            <strong>Эпизод:</strong> {{ result.episode }}<br>
+                            <strong>Дата выхода:</strong> {{ result.air_date }}
+                        </p>
+                        <a href="{% url 'main:episode-detail' result.id %}" class="btn btn-success btn-sm">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-md-6 mb-4">
+                    <div class="location-card card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ result.name }}</h5>
+                            <p class="card-text">
+                                <strong>Тип:</strong> {{ result.type|default:"Неизвестно" }}<br>
+                                <strong>Измерение:</strong> {{ result.dimension|default:"Неизвестно" }}
+                            </p>
+                            <a href="{% url 'main:location-detail' result.id %}" class="btn btn-info btn-sm">
+                                Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-emoji-frown display-1 text-muted mb-3"></i>
+                <h3>Ничего не найдено</h3>
+                <p class="text-muted mb-4">
+                    Попробуйте изменить поисковый запрос или выберите другой тип поиска
+                </p>
+                
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <h5>Попробуйте найти:</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <h6>Персонажи:</h6>
+                                <ul class="list-unstyled">
+                                    <li><a href="?q=Rick&type=character">Rick</a></li>
+                                    <li><a href="?q=Morty&type=character">Morty</a></li>
+                                    <li><a href="?q=Summer&type=character">Summer</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h6>Эпизоды:</h6>
+                                <ul class="list-unstyled">
+                                    <li><a href="?q=Pilot&type=episode">Pilot</a></li>
+                                    <li><a href="?q=Pickle&type=episode">Pickle</a></li>
+                                    <li><a href="?q=S01E01&type=episode">S01E01</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h6>Локации:</h6>
+                                <ul class="list-unstyled">
+                                    <li><a href="?q=Earth&type=location">Earth</a></li>
+                                    <li><a href="?q=Citadel&type=location">Citadel</a></li>
+                                    <li><a href="?q=Dimension&type=location">Dimension</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if pagination_info.pages and pagination_info.pages > 1 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <nav aria-label="Навигация по результатам поиска">
+            <ul class="pagination justify-content-center">
+                {% if pagination_info.prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&type={{ search_type }}&page={{ current_page|add:'-1' }}">
+                            <i class="bi bi-chevron-left"></i> Предыдущая
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if pagination_info.pages %}
+                    {% for page_num in "12345"|make_list %}
+                        {% if page_num|add:"0" <= pagination_info.pages and page_num|add:"0" >= 1 %}
+                            {% if page_num|add:"0" == current_page %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?q={{ query }}&type={{ search_type }}&page={{ page_num }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if pagination_info.next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&type={{ search_type }}&page={{ current_page|add:'1' }}">
+                            Следующая <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Search Tips -->
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h3><i class="bi bi-lightbulb me-2"></i>Советы по поиску</h3>
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-4">
+                        <i class="bi bi-people display-4 text-primary mb-3"></i>
+                        <h5>Поиск персонажей</h5>
+                        <p class="text-muted">
+                            Ищите по имени, виду или происхождению. Например: "Rick", "Human", "Earth"
+                        </p>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <i class="bi bi-play-circle display-4 text-success mb-3"></i>
+                        <h5>Поиск эпизодов</h5>
+                        <p class="text-muted">
+                            Используйте название эпизода или номер серии. Например: "Pilot", "S01E01"
+                        </p>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <i class="bi bi-geo-alt display-4 text-info mb-3"></i>
+                        <h5>Поиск локаций</h5>
+                        <p class="text-muted">
+                            Ищите по названию планеты, измерения или типа локации. Например: "Earth", "Dimension"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus search input
+    const searchInput = document.querySelector('input[name="q"]');
+    if (searchInput && !searchInput.value) {
+        searchInput.focus();
+    }
+    
+    // Auto-submit on type change if query exists
+    const typeSelect = document.querySelector('select[name="type"]');
+    const form = typeSelect.closest('form');
+    
+    typeSelect.addEventListener('change', function() {
+        if (searchInput.value.trim()) {
+            form.submit();
+        }
+    });
+    
+    // Add search history to localStorage
+    if (searchInput.value.trim()) {
+        const searchHistory = JSON.parse(localStorage.getItem('rickMortySearchHistory') || '[]');
+        const newSearch = {
+            query: searchInput.value,
+            type: typeSelect.value,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Remove duplicates and add new search
+        const filteredHistory = searchHistory.filter(item => 
+            !(item.query === newSearch.query && item.type === newSearch.type)
+        );
+        filteredHistory.unshift(newSearch);
+        
+        // Keep only last 10 searches
+        const limitedHistory = filteredHistory.slice(0, 10);
+        localStorage.setItem('rickMortySearchHistory', JSON.stringify(limitedHistory));
+    }
+});
+</script>
+{% endblock %}
