@@ -17,17 +17,27 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
-try:
-    from decouple import config
-    # Используем python-decouple для загрузки .env файла
-    SECRET_KEY = config('SECRET_KEY', default='django-insecure-0@furg6+kd=56=vlhn!4%91@lv_pnmy@d7dw4a@$dw$k06n0za')
-    DEBUG = config('DEBUG', default=True, cast=bool)
-    ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
-except ImportError:
-    # Fallback если python-decouple не установлен
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-0@furg6+kd=56=vlhn!4%91@lv_pnmy@d7dw4a@$dw$k06n0za')
-    DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Load environment variables safely
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-0@furg6+kd=56=vlhn!4%91@lv_pnmy@d7dw4a@$dw$k06n0za')
+
+# Debug mode - temporarily True for troubleshooting
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes', '')
+
+# ALLOWED_HOSTS configuration
+ALLOWED_HOSTS = []
+if os.environ.get('ALLOWED_HOSTS'):
+    ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS').split(',') if host.strip()]
+
+# Default allowed hosts for development and common production domains
+ALLOWED_HOSTS.extend([
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',
+    'rickandmorty-n0mo.onrender.com',
+])
+
+# Remove duplicates
+ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
 
 
 # Quick-start development settings - unsuitable for production
@@ -189,40 +199,35 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'formatter': 'verbose',
-        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple',
+            'formatter': 'verbose' if DEBUG else 'simple',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARNING',
+        'level': 'INFO' if DEBUG else 'WARNING',
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
         'main': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
     },
 }
 
-# Ensure logs directory exists
-import pathlib
-logs_dir = BASE_DIR / 'logs'
-logs_dir.mkdir(exist_ok=True)
+# Create logs directory only in development
+if DEBUG:
+    import pathlib
+    logs_dir = BASE_DIR / 'logs'
+    logs_dir.mkdir(exist_ok=True)
 
 # Production settings
 if not DEBUG:

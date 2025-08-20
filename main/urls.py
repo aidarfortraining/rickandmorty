@@ -8,6 +8,9 @@ router = DefaultRouter()
 app_name = 'main'
 
 urlpatterns = [
+    # Диагностика
+    path('health/', views.health_check, name='health'),
+    
     # Главная страница
     path('', views.home_view, name='home'),
     

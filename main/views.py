@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.db import connection
+from django.conf import settings
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -319,3 +321,72 @@ class SearchAPIView(APIView):
                 )
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def health_check(request):
+    """Health check endpoint for monitoring and debugging"""
+    try:
+        # Check database connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            db_status = "OK"
+            
+            # Check if main tables exist
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            tables = [table[0] for table in cursor.fetchall()]
+            
+            main_tables = ['main_character', 'main_episode', 'main_location']
+            missing_tables = [table for table in main_tables if table not in tables]
+            
+        # Check models
+        try:
+            character_count = Character.objects.count()
+            episode_count = Episode.objects.count()
+            location_count = Location.objects.count()
+            models_status = "OK"
+        except Exception as e:
+            character_count = episode_count = location_count = 0
+            models_status = f"Error: {e}"
+        
+        # Check API service
+        try:
+            api_status = "OK" if api_service else "Not available"
+        except:
+            api_status = "Error"
+            
+        health_data = {
+            "status": "healthy" if db_status == "OK" and models_status == "OK" else "unhealthy",
+            "timestamp": "2025-01-20T12:00:00Z",
+            "database": {
+                "status": db_status,
+                "tables_found": len(tables),
+                "missing_tables": missing_tables,
+                "database_path": str(settings.DATABASES['default']['NAME']),
+            },
+            "models": {
+                "status": models_status,
+                "characters": character_count,
+                "episodes": episode_count,
+                "locations": location_count,
+            },
+            "api_service": {
+                "status": api_status
+            },
+            "settings": {
+                "debug": settings.DEBUG,
+                "allowed_hosts": settings.ALLOWED_HOSTS,
+                "database_engine": settings.DATABASES['default']['ENGINE'],
+            }
+        }
+        
+        return JsonResponse(health_data)
+        
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "error": str(e),
+            "settings": {
+                "debug": settings.DEBUG,
+                "allowed_hosts": settings.ALLOWED_HOSTS,
+            }
+        }, status=500)
