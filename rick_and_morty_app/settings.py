@@ -89,12 +89,19 @@ WSGI_APPLICATION = 'rick_and_morty_app.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 # Database configuration
-# For production on Render, use PostgreSQL from environment
 if os.environ.get('DATABASE_URL'):
-    # Production database (Render provides DATABASE_URL)
+    # Production database (Render/Heroku provides DATABASE_URL)
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+elif os.environ.get('RENDER'):
+    # Render platform detected but no DATABASE_URL - use SQLite with proper path
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '/tmp/db.sqlite3',  # Use /tmp for writable storage on Render
+        }
     }
 else:
     # Development database
