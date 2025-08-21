@@ -32,6 +32,7 @@ if os.environ.get('ALLOWED_HOSTS'):
 ALLOWED_HOSTS.extend([
     'localhost',
     '127.0.0.1',
+    'testserver',  # For Django test client
     '.onrender.com',
     'rickandmorty-n0mo.onrender.com',
 ])

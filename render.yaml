@@ -4,12 +4,12 @@ services:
     env: python
     plan: free
     buildCommand: "./build.sh"
-    startCommand: "./start.sh"
+    startCommand: "gunicorn rick_and_morty_app.wsgi:application"
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
-        value: "True"
+        value: "False"
       - key: RENDER
         value: "1"
       - key: ALLOWED_HOSTS

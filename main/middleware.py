@@ -1,15 +1,16 @@
 """
-Middleware для автоматической инициализации базы данных (только для production)
+Middleware для мониторинга базы данных (только для production)
 """
 import logging
 import os
 from django.db import connection
 from django.conf import settings
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
 class DatabaseInitMiddleware:
-    """Middleware для проверки и инициализации базы данных (только на production)"""
+    """Middleware для мониторинга базы данных (только на production)"""
     
     def __init__(self, get_response):
         self.get_response = get_response
@@ -19,34 +20,57 @@ class DatabaseInitMiddleware:
         self.is_production = os.environ.get('RENDER') or not settings.DEBUG
         
         if self.is_production:
-            logger.info("Production environment detected, will check database")
+            logger.info("Production environment detected, will monitor database")
         else:
-            logger.info("Development environment, skipping auto database init")
+            logger.info("Development environment, skipping database monitoring")
     
-    def check_database_lazy(self):
-        """Ленивая проверка базы данных (только при первом запросе)"""
+    def check_database_health(self):
+        """Проверка состояния базы данных"""
         if self.db_checked or not self.is_production:
-            return
+            return True
             
         try:
             # Проверяем есть ли основные таблицы
             with connection.cursor() as cursor:
-                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='main_character';")
-                if cursor.fetchone():
-                    logger.info("Database tables found")
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'main_%';")
+                tables = cursor.fetchall()
+                
+                expected_tables = ['main_character', 'main_episode', 'main_location']
+                found_tables = [table[0] for table in tables]
+                missing_tables = [t for t in expected_tables if t not in found_tables]
+                
+                if missing_tables:
+                    logger.error(f"Missing database tables: {missing_tables}")
+                    return False
                 else:
-                    logger.warning("Database tables not found, but auto-migration disabled in middleware")
+                    logger.info("All database tables found")
+                    return True
                     
-            self.db_checked = True
-            
         except Exception as e:
-            logger.error(f"Database check failed: {e}")
-            self.db_checked = True  # Не проверяем снова
+            logger.error(f"Database health check failed: {e}")
+            return False
+        finally:
+            self.db_checked = True
     
     def __call__(self, request):
-        # Проверяем БД только при первом запросе в production
+        # Для health endpoint - всегда проверяем БД
+        if request.path == '/health/':
+            # Пропускаем middleware для health check
+            response = self.get_response(request)
+            return response
+        
+        # Для остальных запросов - проверяем БД только в production при первом запросе
         if not self.db_checked and self.is_production:
-            self.check_database_lazy()
+            db_healthy = self.check_database_health()
+            
+            # Если БД нездорова, возвращаем 503 Service Unavailable
+            if not db_healthy:
+                logger.error("Database is unhealthy, returning 503")
+                return JsonResponse({
+                    'error': 'Database not initialized',
+                    'message': 'Please wait for database initialization to complete',
+                    'status': 503
+                }, status=503)
             
         response = self.get_response(request)
         return response

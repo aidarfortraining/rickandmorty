@@ -258,46 +258,90 @@ def search_view(request):
     search_type = request.GET.get('type', 'character')
     page = request.GET.get('page', 1)
     
+    # Преобразуем page в int сразу
+    try:
+        page_int = int(page)
+    except (ValueError, TypeError):
+        page_int = 1
+    
     results = []
     pagination_info = {}
     results_count = 0
+    error_message = None
+    data_source = "api"
     
-    if query:
-        if search_type == 'character':
-            # Улучшенный поиск персонажей - пробуем разные параметры
-            api_data = api_service.get_characters(page=int(page), name=query)
-            # Если ничего не найдено по имени, пробуем поиск по виду
-            if not api_data or not api_data.get('results'):
-                api_data = api_service.get_characters(page=int(page), species=query)
-        elif search_type == 'episode':
-            api_data = api_service.get_episodes(page=int(page), name=query)
-            # Если ничего не найдено по названию, пробуем поиск по номеру эпизода
-            if not api_data or not api_data.get('results'):
-                api_data = api_service.get_episodes(page=int(page), episode=query)
-        elif search_type == 'location':
-            api_data = api_service.get_locations(page=int(page), name=query)
-            # Если ничего не найдено по названию, пробуем поиск по типу
-            if not api_data or not api_data.get('results'):
-                api_data = api_service.get_locations(page=int(page), type=query)
-        else:
+    try:
+        if query:
             api_data = None
             
-        if api_data and 'results' in api_data:
-            results = api_data['results']
-            pagination_info = api_data.get('info', {})
-            results_count = pagination_info.get('count', 0)
-            
-        # Сохраняем в историю поиска
-        if query and results_count > 0:
-            sync_service.save_search_history(query, search_type, results_count)
+            try:
+                if search_type == 'character':
+                    # Улучшенный поиск персонажей - пробуем разные параметры
+                    api_data = api_service.get_characters(page=page_int, name=query)
+                    # Если ничего не найдено по имени, пробуем поиск по виду
+                    if not api_data or not api_data.get('results'):
+                        api_data = api_service.get_characters(page=page_int, species=query)
+                elif search_type == 'episode':
+                    api_data = api_service.get_episodes(page=page_int, name=query)
+                    # Если ничего не найдено по названию, пробуем поиск по номеру эпизода
+                    if not api_data or not api_data.get('results'):
+                        api_data = api_service.get_episodes(page=page_int, episode=query)
+                elif search_type == 'location':
+                    api_data = api_service.get_locations(page=page_int, name=query)
+                    # Если ничего не найдено по названию, пробуем поиск по типу
+                    if not api_data or not api_data.get('results'):
+                        api_data = api_service.get_locations(page=page_int, type=query)
+                        
+            except Exception as api_error:
+                logger.error(f"API search failed for {search_type} '{query}': {api_error}")
+                # Fallback to local database search
+                try:
+                    if search_type == 'character':
+                        local_results = Character.objects.filter(name__icontains=query)[:20]
+                        results = [{'id': char.api_id, 'name': char.name, 'status': char.status, 
+                                  'species': char.species, 'image': char.image} for char in local_results]
+                    elif search_type == 'episode':
+                        local_results = Episode.objects.filter(name__icontains=query)[:20]
+                        results = [{'id': ep.api_id, 'name': ep.name, 'episode': ep.episode, 
+                                  'air_date': ep.air_date} for ep in local_results]
+                    elif search_type == 'location':
+                        local_results = Location.objects.filter(name__icontains=query)[:20]
+                        results = [{'id': loc.api_id, 'name': loc.name, 'type': loc.type, 
+                                  'dimension': loc.dimension} for loc in local_results]
+                    
+                    results_count = len(results)
+                    data_source = "database"
+                    error_message = "API недоступен, результаты из локальной базы данных"
+                    
+                except Exception as db_error:
+                    logger.error(f"Database search also failed: {db_error}")
+                    error_message = "Поиск временно недоступен. Попробуйте позже."
+                    
+            if api_data and 'results' in api_data:
+                results = api_data['results']
+                pagination_info = api_data.get('info', {})
+                results_count = pagination_info.get('count', 0)
+                
+            # Сохраняем в историю поиска только если есть результаты
+            if query and results_count > 0:
+                try:
+                    sync_service.save_search_history(query, search_type, results_count)
+                except Exception as e:
+                    logger.warning(f"Failed to save search history: {e}")
+
+    except Exception as e:
+        logger.error(f"Unexpected error in search_view: {e}")
+        error_message = "Произошла ошибка при поиске"
 
     context = {
         'query': query,
         'search_type': search_type,
         'results': results,
         'pagination_info': pagination_info,
-        'current_page': int(page),
+        'current_page': page_int,
         'results_count': results_count,
+        'error_message': error_message,
+        'data_source': data_source,
         'search_types': [
             ('character', 'Персонажи'),
             ('episode', 'Эпизоды'),
